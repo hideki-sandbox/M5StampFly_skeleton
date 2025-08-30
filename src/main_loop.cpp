@@ -62,8 +62,6 @@ float limit(float value, float min, float max);
 void loop_400Hz(void) {
     // 400Hzで以降のコードが実行
 
-    StampFly.flag.mode = PARKING_MODE;
-
     update_loop400Hz();
     
     // Mode select
