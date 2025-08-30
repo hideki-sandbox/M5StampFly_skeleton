@@ -198,6 +198,11 @@ void flight_mode(void) {
     //Arm（スロットル）ボタンを監視して押されたらParkingモードに復帰するためのコード
     if (armButtonPressedAndRerleased)StampFly.flag.mode = PARKING_MODE;
     armButtonPressedAndRerleased = 0;
+
+    //Stickの値をシリアルモニタに送る(Lesson2)
+    USBSerial.printf("throttle: %5.2f AILERON %5.2f ELEVATOR %5.2f RUDDER %5.2f\n",
+        Stick[THROTTLE], Stick[AILERON], Stick[ELEVATOR], Stick[RUDDER]);
+        
 }
 
 void parking_mode(void) {
