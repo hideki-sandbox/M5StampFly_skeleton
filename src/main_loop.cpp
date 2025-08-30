@@ -189,11 +189,19 @@ void flight_mode(void) {
     onboard_led1(YELLOW, 1);
     onboard_led2(YELLOW, 1);
     StampFly.ref.throttle = limit(Stick[THROTTLE], 0.0, 0.9);
+    StampFly.ref.roll = limit(Stick[AILERON], -0.9, 0.9);
+    StampFly.ref.pitch = limit(Stick[ELEVATOR], -0.9, 0.9);
+    StampFly.ref.yaw = limit(Stick[RUDDER], -0.9, 0.9);
 
-    motor_set_duty_fl(0.15);
-    motor_set_duty_fr(0.15);
-    motor_set_duty_rl(0.15);
-    motor_set_duty_rr(0.15);
+    float front_left_duty  = StampFly.ref.throttle + StampFly.ref.roll + StampFly.ref.pitch - StampFly.ref.yaw;
+    float front_right_duty = StampFly.ref.throttle - StampFly.ref.roll + StampFly.ref.pitch + StampFly.ref.yaw;
+    float rear_left_duty   = StampFly.ref.throttle + StampFly.ref.roll - StampFly.ref.pitch + StampFly.ref.yaw;
+    float rear_right_duty  = StampFly.ref.throttle - StampFly.ref.roll - StampFly.ref.pitch - StampFly.ref.yaw;
+    
+    motor_set_duty_fl(front_left_duty);
+    motor_set_duty_fr(front_right_duty);
+    motor_set_duty_rl(rear_left_duty);
+    motor_set_duty_rr(rear_right_duty);
 
     //Arm（スロットル）ボタンを監視して押されたらParkingモードに復帰するためのコード
     if (armButtonPressedAndRerleased)StampFly.flag.mode = PARKING_MODE;
@@ -202,7 +210,7 @@ void flight_mode(void) {
     //Stickの値をシリアルモニタに送る(Lesson2)
     USBSerial.printf("throttle: %5.2f AILERON %5.2f ELEVATOR %5.2f RUDDER %5.2f\n",
         Stick[THROTTLE], Stick[AILERON], Stick[ELEVATOR], Stick[RUDDER]);
-        
+
 }
 
 void parking_mode(void) {
