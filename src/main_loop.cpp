@@ -42,6 +42,7 @@
 #include "stampfly.hpp"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "illumination.hpp"
 
 
 volatile uint8_t armButtonState = 0;
@@ -216,8 +217,10 @@ void flight_mode(void) {
 void parking_mode(void) {
     //着陸している時に行う処理を記述する
     // Set LED Color
-    onboard_led1(GREEN, 1);
-    onboard_led2(GREEN, 1);
+    //onboard_led1(GREEN, 1);
+    //onboard_led2(GREEN, 1);
+
+    led_illumination();
 
     StampFly.counter.loop = 0;
     
