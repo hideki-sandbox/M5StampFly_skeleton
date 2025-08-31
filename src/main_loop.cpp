@@ -200,7 +200,7 @@ void flight_mode(void) {
 
     //不感帯の適用 デッドバンドは0と残りは1.0まで均等化する
     //（ファイル末にdeadand関数あり)
-    #define DEADBAND 0.3
+    #define DEADBAND 0.03
     StampFly.ref.throttle = deadband(StampFly.ref.throttle, DEADBAND);
     StampFly.ref.roll = deadband(StampFly.ref.roll, DEADBAND);
     StampFly.ref.pitch = deadband(StampFly.ref.pitch, DEADBAND);
@@ -212,9 +212,9 @@ void flight_mode(void) {
     float yaw_rate_error = StampFly.ref.yaw - StampFly.sensor.yaw_rate;
 
     //比例係数設定
-    float kp_roil = 0.0;
-    float kp_pitch = 0.0;
-    float kp_yaw = 0.0;
+    float kp_roil = 0.049;
+    float kp_pitch = 0.071;
+    float kp_yaw = 0.363;
 
     //比例制御演算　比例係数 * 誤差  
     float delta_roll = kp_roil * roll_rate_error;
@@ -223,7 +223,7 @@ void flight_mode(void) {
 
     //トリム調整値
     float trim_roll = 0.00;
-    float trim_pitch = 0.00;
+    float trim_pitch = -0.02;
     float trim_yaw = 0.00;
     delta_roll += trim_roll;
     delta_pitch += trim_pitch;
