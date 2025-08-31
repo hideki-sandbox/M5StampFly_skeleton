@@ -223,9 +223,15 @@ void flight_mode(void) {
     USBSerial.printf("%6d\n", jikoku);
     #endif 
     #if 1
-    USBSerial.printf("%3.2f, %3.2f, %3.2f, %3.2f,  %3.2f, %3.2f\n",
-        StampFly.sensor.accx, StampFly.sensor.accy, StampFly.sensor,
-        StampFly.sensor.roll_rate, StampFly.sensor.pitch_rate, StampFly.sensor.yaw_rate);
+    USBSerial.printf("%9.2f, %9.2f, %9.2f, %9.2f, %9.2f,  %9.2f, %9.2f\r\n",
+        StampFly.times.elapsed_time,
+        StampFly.sensor.accx,
+        StampFly.sensor.accy, 
+        StampFly.sensor.accz,
+        StampFly.sensor.roll_rate,
+        StampFly.sensor.pitch_rate,
+        StampFly.sensor.yaw_rate
+        );
             
     #endif
 }
