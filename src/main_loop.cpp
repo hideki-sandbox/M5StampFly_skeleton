@@ -210,20 +210,15 @@ void flight_mode(void) {
     float roll_rate_error = StampFly.ref.roll - StampFly.sensor.roll_rate;
     float pitch_rate_error = StampFly.ref.pitch - StampFly.sensor.pitch_rate;
     float yaw_rate_error = StampFly.ref.yaw - StampFly.sensor.yaw_rate;
-
-    //比例係数設定
-    float kp_roil = 0.049;
-    float kp_pitch = 0.071;
-    float kp_yaw = 0.363;
-
-    //比例制御演算　比例係数 * 誤差  
-    float delta_roll = kp_roil * roll_rate_error;
-    float delta_pitch = kp_pitch * pitch_rate_error;
-    float delta_yaw = kp_yaw * yaw_rate_error;
+  
+    //PID制御 
+    float delta_roll = StampFly.pid.roll.update(roll_rate_error, StampFly.times.interval_time);
+    float delta_pitch = StampFly.pid.pitch.update(pitch_rate_error, StampFly.times.interval_time);
+    float delta_yaw = StampFly.pid.yaw.update(yaw_rate_error, StampFly.times.interval_time);
 
     //トリム調整値
-    float trim_roll = 0.00;
-    float trim_pitch = -0.02;
+    float trim_roll = 0.01;
+    float trim_pitch = -0.05;
     float trim_yaw = 0.00;
     delta_roll += trim_roll;
     delta_pitch += trim_pitch;
@@ -282,7 +277,32 @@ void parking_mode(void) {
     led_illumination();
 
     StampFly.counter.loop = 0;
-    
+
+    //PIDパラメータ設定
+    float kp_roll = 0.49f;
+    float kp_pitch = 0.071f;
+    float kp_yaw = 0.363f;
+    float ti_roll = 1000000;
+    float ti_pitch = 1000000;
+    float ti_yaw = 1000000;
+    float td_roll = 0;
+    float td_pitch = 0;
+    float td_yaw = 0;
+    float eta_roll = 0.052f;
+    float eta_pitch = 0.052f;
+    float eta_yaw = 0.52;
+    float h = 0.025;
+
+    //ゲインの設定
+    StampFly.pid.roll.set_parameter(kp_roll, ti_roll, td_roll, eta_roll, h);
+    StampFly.pid.pitch.set_parameter(kp_pitch, ti_pitch, td_pitch,eta_pitch, h);
+    StampFly.pid.yaw.set_parameter(kp_yaw, ti_yaw, td_yaw, eta_yaw, h);
+
+    //着陸時に積分をクリア
+    StampFly.pid.roll.reset();
+    StampFly.pid.pitch.reset();
+    StampFly.pid.yaw.reset();
+        
     motor_stop();
     if (armButtonPressedAndRerleased)StampFly.flag.mode = FLIGHT_MODE;
     armButtonPressedAndRerleased = 0;
