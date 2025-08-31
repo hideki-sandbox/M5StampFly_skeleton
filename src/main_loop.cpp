@@ -194,6 +194,7 @@ void flight_mode(void) {
     StampFly.ref.pitch = limit(Stick[ELEVATOR], -0.9, 0.9);
     StampFly.ref.yaw = limit(Stick[RUDDER], -0.9, 0.9);
 
+    //ミキシング
     float front_left_duty  = StampFly.ref.throttle + StampFly.ref.roll + StampFly.ref.pitch - StampFly.ref.yaw;
     float front_right_duty = StampFly.ref.throttle - StampFly.ref.roll + StampFly.ref.pitch + StampFly.ref.yaw;
     float rear_left_duty   = StampFly.ref.throttle + StampFly.ref.roll - StampFly.ref.pitch + StampFly.ref.yaw;
