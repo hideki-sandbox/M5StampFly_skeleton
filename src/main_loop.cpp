@@ -189,10 +189,44 @@ void flight_mode(void) {
     // Set LED Color
     onboard_led1(YELLOW, 1);
     onboard_led2(YELLOW, 1);
+    // 比例制御の実装(Lesson6)
+    //目標スロットル値の取得：ジョイスティックの傾き
     StampFly.ref.throttle = limit(Stick[THROTTLE], 0.0, 0.9);
+    //目標角速度の取得：ジョイスティックの傾き
     StampFly.ref.roll = limit(Stick[AILERON], -0.9, 0.9);
     StampFly.ref.pitch = limit(Stick[ELEVATOR], -0.9, 0.9);
     StampFly.ref.yaw = limit(Stick[RUDDER], -0.9, 0.9);
+
+    //不感帯の適用 デッドバンドは0と残りは1.0まで均等化する
+    //（ファイル末にdeadand関数あり)
+    #define DEADBAND 0.3
+    StampFly.ref.throttle = deadband(StampFly.ref.throttle, DEADBAND);
+    StampFly.ref.roll = deadband(StampFly.ref.roll, DEADBAND);
+    StampFly.ref.pitch = deadband(StampFly.ref.pitch, DEADBAND);
+    StampFly.ref.yaw = deadband(StampFly.ref.yaw, DEADBAND);
+
+    //誤差の算出 目標角速度 - 角速度センサ出力
+    float roll_rate_error = StampFly.ref.roll - StampFly.sensor.roll_rate;
+    float pitch_rate_error = StampFly.ref.pitch - StampFly.sensor.pitch_rate;
+    float yaw_rate_error = StampFly.ref.yaw - StampFly.sensor.yaw_rate;
+
+    //比例係数設定
+    float kp_roil = 1.0;
+    float kp_pitch = 1.0;
+    float kp_yaw = 1.0;
+
+    //比例制御演算　比例係数 * 誤差  
+    float delta_roll = kp_roil * roll_rate_error;
+    float delta_pitch = kp_pitch * pitch_rate_error;
+    float delta_yaw = kp_yaw * yaw_rate_error;
+
+    //トリム調整値設定
+    float trim_roll = 0.00;
+    float trim_pitch = 0.00;
+    float trim_yaw = 0.00;
+
+    
+
 
     //ミキシング
     float front_left_duty  = StampFly.ref.throttle + StampFly.ref.roll + StampFly.ref.pitch - StampFly.ref.yaw;
@@ -256,4 +290,11 @@ float limit(float value, float min, float max) {
     if (value < min) return min;
     if (value > max) return max;
     return value;
+}
+
+//不感帯適用関数
+float deadband(float value, float db){
+    if(value > db) return(value - db) / (1 - db);
+    if(value < db) return(value + db) / (1 - db);
+    return 0;
 }
