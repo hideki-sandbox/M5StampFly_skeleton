@@ -279,7 +279,7 @@ void parking_mode(void) {
     StampFly.counter.loop = 0;
 
     //PIDパラメータ設定
-    float kp_roll = 0.49f;
+    float kp_roll = 0.049f;
     float kp_pitch = 0.071f;
     float kp_yaw = 0.363f;
     float ti_roll = 1000000;
