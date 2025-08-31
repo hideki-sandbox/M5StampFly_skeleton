@@ -210,17 +210,33 @@ void flight_mode(void) {
     armButtonPressedAndRerleased = 0;
 
     //Stickの値をシリアルモニタに送る(Lesson2)
+    #if 0
     USBSerial.printf("throttle: %5.2f AILERON %5.2f ELEVATOR %5.2f RUDDER %5.2f\n",
         Stick[THROTTLE], Stick[AILERON], Stick[ELEVATOR], Stick[RUDDER]);
-
+    #endif
+    //加速度三軸分と加速度三軸分をコンマで区切って表示
+    //一番最初に今の時刻(Lesson5)
+    #if 0
+    int32_t jikoku;
+    //jikoku = StampFly.times.start_time - (int32_t)StampFly.times.elapsed_time;
+    jikoku = StampFly.times.start_time;
+    USBSerial.printf("%6d\n", jikoku);
+    #endif 
+    #if 1
+    USBSerial.printf("%3.2f, %3.2f, %3.2f, %3.2f,  %3.2f, %3.2f\n",
+        StampFly.sensor.accx, StampFly.sensor.accy, StampFly.sensor,
+        StampFly.sensor.roll_rate, StampFly.sensor.pitch_rate, StampFly.sensor.yaw_rate);
+            
+    #endif
 }
 
 void parking_mode(void) {
     //着陸している時に行う処理を記述する
     // Set LED Color
-    //onboard_led1(GREEN, 1);
-    //onboard_led2(GREEN, 1);
-
+    #if 0 
+    onboard_led1(GREEN, 1);
+    onboard_led2(GREEN, 1);
+    #endif
     led_illumination();
 
     StampFly.counter.loop = 0;
