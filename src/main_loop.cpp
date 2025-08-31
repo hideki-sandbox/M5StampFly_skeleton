@@ -58,6 +58,7 @@ void flight_mode(void);
 void parking_mode(void);
 void loop_400Hz(void);
 float limit(float value, float min, float max);
+float deadband(float value, float db);
 
 // Main loop
 void loop_400Hz(void) {
@@ -211,29 +212,36 @@ void flight_mode(void) {
     float yaw_rate_error = StampFly.ref.yaw - StampFly.sensor.yaw_rate;
 
     //比例係数設定
-    float kp_roil = 1.0;
-    float kp_pitch = 1.0;
-    float kp_yaw = 1.0;
+    float kp_roil = 0.0;
+    float kp_pitch = 0.0;
+    float kp_yaw = 0.0;
 
     //比例制御演算　比例係数 * 誤差  
     float delta_roll = kp_roil * roll_rate_error;
     float delta_pitch = kp_pitch * pitch_rate_error;
     float delta_yaw = kp_yaw * yaw_rate_error;
 
-    //トリム調整値設定
+    //トリム調整値
     float trim_roll = 0.00;
     float trim_pitch = 0.00;
     float trim_yaw = 0.00;
-
-    
+    delta_roll += trim_roll;
+    delta_pitch += trim_pitch;
+    delta_yaw += trim_yaw;    
 
 
     //ミキシング
-    float front_left_duty  = StampFly.ref.throttle + StampFly.ref.roll + StampFly.ref.pitch - StampFly.ref.yaw;
-    float front_right_duty = StampFly.ref.throttle - StampFly.ref.roll + StampFly.ref.pitch + StampFly.ref.yaw;
-    float rear_left_duty   = StampFly.ref.throttle + StampFly.ref.roll - StampFly.ref.pitch + StampFly.ref.yaw;
-    float rear_right_duty  = StampFly.ref.throttle - StampFly.ref.roll - StampFly.ref.pitch - StampFly.ref.yaw;
+    float front_left_duty  = StampFly.ref.throttle + delta_roll + delta_pitch - delta_yaw;
+    float front_right_duty = StampFly.ref.throttle - delta_roll + delta_pitch + delta_yaw;
+    float rear_left_duty   = StampFly.ref.throttle + delta_roll - delta_pitch + delta_yaw;
+    float rear_right_duty  = StampFly.ref.throttle - delta_roll - delta_pitch - delta_yaw;
     
+    //Dutyを制限
+    front_left_duty = limit(front_left_duty, 0.00, 0.95 );
+    front_right_duty = limit(front_right_duty, 0.00, 0.95);
+    rear_left_duty = limit(rear_left_duty, 0.00, 0.95);
+    rear_right_duty = limit(rear_right_duty, 0.00, 0.95);
+
     motor_set_duty_fl(front_left_duty);
     motor_set_duty_fr(front_right_duty);
     motor_set_duty_rl(rear_left_duty);
@@ -244,19 +252,13 @@ void flight_mode(void) {
     armButtonPressedAndRerleased = 0;
 
     //Stickの値をシリアルモニタに送る(Lesson2)
-    #if 0
+    #if 1
     USBSerial.printf("throttle: %5.2f AILERON %5.2f ELEVATOR %5.2f RUDDER %5.2f\n",
         Stick[THROTTLE], Stick[AILERON], Stick[ELEVATOR], Stick[RUDDER]);
     #endif
     //加速度三軸分と加速度三軸分をコンマで区切って表示
     //一番最初に今の時刻(Lesson5)
     #if 0
-    int32_t jikoku;
-    //jikoku = StampFly.times.start_time - (int32_t)StampFly.times.elapsed_time;
-    jikoku = StampFly.times.start_time;
-    USBSerial.printf("%6d\n", jikoku);
-    #endif 
-    #if 1
     USBSerial.printf("%9.2f, %9.2f, %9.2f, %9.2f, %9.2f,  %9.2f, %9.2f\r\n",
         StampFly.times.elapsed_time,
         StampFly.sensor.accx,
